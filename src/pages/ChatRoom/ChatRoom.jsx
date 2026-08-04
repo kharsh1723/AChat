@@ -6,20 +6,46 @@ import {
   subscribeMessages,
 } from "../../services/messageService";
 
+import {
+  joinRoom,
+  leaveRoom,
+  subscribeUsers,
+} from "../../services/presenceService";
+
 import { getUsername } from "../../utils/localStorage";
 
 function ChatRoom() {
+
   const { roomCode } = useParams();
 
   const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
   const [text, setText] = useState("");
 
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    const unsubscribe = subscribeMessages(roomCode, setMessages);
 
-    return () => unsubscribe();
+    const username = getUsername();
+
+    joinRoom(roomCode, username);
+
+    const unsubscribeMessages =
+      subscribeMessages(roomCode, setMessages);
+
+    const unsubscribeUsers =
+      subscribeUsers(roomCode, setUsers);
+
+    return () => {
+
+      leaveRoom(roomCode, username);
+
+      unsubscribeMessages();
+
+      unsubscribeUsers();
+
+    };
+
   }, [roomCode]);
 
   useEffect(() => {
@@ -29,6 +55,7 @@ function ChatRoom() {
   }, [messages]);
 
   async function handleSend() {
+
     if (!text.trim()) return;
 
     await sendMessage(
@@ -38,12 +65,14 @@ function ChatRoom() {
     );
 
     setText("");
+
   }
 
   return (
+
     <div className="min-h-screen bg-slate-950 flex flex-col">
 
-      {/* Header */}
+      {/* HEADER */}
 
       <div className="bg-slate-900 border-b border-slate-700 p-5">
 
@@ -51,9 +80,28 @@ function ChatRoom() {
           Room {roomCode}
         </h1>
 
+        <p className="text-green-400 mt-2">
+          🟢 Online ({users.length})
+        </p>
+
+        <div className="flex flex-wrap gap-2 mt-3">
+
+          {users.map((user) => (
+
+            <span
+              key={user.username}
+              className="bg-slate-700 text-white px-3 py-1 rounded-full text-sm"
+            >
+              {user.username}
+            </span>
+
+          ))}
+
+        </div>
+
       </div>
 
-      {/* Messages */}
+      {/* MESSAGES */}
 
       <div className="flex-1 overflow-y-auto p-6">
 
@@ -100,7 +148,7 @@ function ChatRoom() {
 
       </div>
 
-      {/* Input */}
+      {/* INPUT */}
 
       <div className="p-5 bg-slate-900 flex gap-3">
 
@@ -109,7 +157,6 @@ function ChatRoom() {
           onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
           className="flex-1 rounded-xl bg-slate-800 text-white p-3 outline-none"
-
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               handleSend();
@@ -127,7 +174,9 @@ function ChatRoom() {
       </div>
 
     </div>
+
   );
+
 }
 
 export default ChatRoom;
