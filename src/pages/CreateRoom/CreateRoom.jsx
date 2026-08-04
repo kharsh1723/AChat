@@ -13,6 +13,7 @@ function CreateRoom() {
   const [roomCode, setRoomCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
+  const [copied, setCopied] = useState(false);
 
   async function handleCreateRoom() {
 
@@ -35,7 +36,15 @@ function CreateRoom() {
   function enterChat() {
     navigate(`/chat/${roomCode}`);
   }
+  function copyRoomCode() {
+  navigator.clipboard.writeText(roomCode);
 
+  setCopied(true);
+
+  setTimeout(() => {
+    setCopied(false);
+  }, 2000);
+}
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
 
@@ -63,15 +72,26 @@ function CreateRoom() {
         ) : (
           <>
             <h2 className="text-center text-5xl text-white mt-8">
-              {roomCode}
-            </h2>
+  {roomCode}
+</h2>
 
-            <div className="mt-8">
-              <Button
-                title="Enter Chat"
-                onClick={enterChat}
-              />
-            </div>
+<button
+  onClick={copyRoomCode}
+  className={`w-full mt-5 py-3 rounded-xl font-semibold transition-all duration-300 ${
+    copied
+      ? "bg-green-600 text-white"
+      : "bg-slate-800 hover:bg-slate-700 text-white"
+  }`}
+>
+  {copied ? "✅ Copied!" : "📋 Copy Room Code"}
+</button>
+
+<div className="mt-5">
+  <Button
+    title="Enter Chat"
+    onClick={enterChat}
+  />
+</div>
           </>
         )}
 
