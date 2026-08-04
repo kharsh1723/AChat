@@ -26,10 +26,10 @@ function App() {
           element={<JoinRoom />}
         />
 
-        <Route
-          path="/chat"
-          element={<ChatRoom />}
-        />
+       <Route
+  path="/chat/:roomCode"
+  element={<ChatRoom />}
+/>
 
       </Routes>
 

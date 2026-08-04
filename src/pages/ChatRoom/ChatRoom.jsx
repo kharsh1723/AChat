@@ -1,40 +1,43 @@
-import { useState } from "react";
-import MessageBubble from "../../components/MessageBubble/MessageBubble";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+
+import {
+  sendMessage,
+  subscribeMessages,
+} from "../../services/messageService";
+
+import { getUsername } from "../../utils/localStorage";
 
 function ChatRoom() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hello 👋",
-      mine: false,
-    },
-    {
-      id: 2,
-      text: "Hi!!",
-      mine: true,
-    },
-    {
-      id: 3,
-      text: "Welcome to AChat 🚀",
-      mine: false,
-    },
-  ]);
+  const { roomCode } = useParams();
 
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
 
-  function sendMessage() {
-    if (!input.trim()) return;
+  const bottomRef = useRef(null);
 
-    setMessages([
-      ...messages,
-      {
-        id: Date.now(),
-        text: input,
-        mine: true,
-      },
-    ]);
+  useEffect(() => {
+    const unsubscribe = subscribeMessages(roomCode, setMessages);
 
-    setInput("");
+    return () => unsubscribe();
+  }, [roomCode]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  async function handleSend() {
+    if (!text.trim()) return;
+
+    await sendMessage(
+      roomCode,
+      getUsername(),
+      text
+    );
+
+    setText("");
   }
 
   return (
@@ -42,15 +45,11 @@ function ChatRoom() {
 
       {/* Header */}
 
-      <div className="border-b border-slate-800 p-5 flex justify-between">
+      <div className="bg-slate-900 border-b border-slate-700 p-5">
 
         <h1 className="text-cyan-400 text-2xl font-bold">
-          AChat 🚀
+          Room {roomCode}
         </h1>
-
-        <p className="text-green-400">
-          🟢 Connected
-        </p>
 
       </div>
 
@@ -58,30 +57,69 @@ function ChatRoom() {
 
       <div className="flex-1 overflow-y-auto p-6">
 
-        {messages.map((msg) => (
-          <MessageBubble
-            key={msg.id}
-            message={msg.text}
-            mine={msg.mine}
-          />
-        ))}
+        {messages.map((msg) => {
+
+          const mine = msg.username === getUsername();
+
+          return (
+
+            <div
+              key={msg.id}
+              className={`flex mb-4 ${
+                mine ? "justify-end" : "justify-start"
+              }`}
+            >
+
+              <div
+                className={`max-w-[70%] rounded-2xl p-4 ${
+                  mine
+                    ? "bg-cyan-500 text-white"
+                    : "bg-slate-800 text-white"
+                }`}
+              >
+
+                {!mine && (
+
+                  <p className="text-xs text-cyan-300 font-bold mb-1">
+                    {msg.username}
+                  </p>
+
+                )}
+
+                <p>{msg.message}</p>
+
+              </div>
+
+            </div>
+
+          );
+
+        })}
+
+        <div ref={bottomRef}></div>
 
       </div>
 
       {/* Input */}
 
-      <div className="border-t border-slate-800 p-4 flex gap-3">
+      <div className="p-5 bg-slate-900 flex gap-3">
 
         <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 rounded-xl bg-slate-800 px-5 py-4 text-white outline-none"
+          className="flex-1 rounded-xl bg-slate-800 text-white p-3 outline-none"
+
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSend();
+            }
+          }}
         />
 
         <button
-          onClick={sendMessage}
-          className="rounded-xl bg-cyan-500 px-8 text-white hover:bg-cyan-400"
+          onClick={handleSend}
+          className="bg-cyan-500 hover:bg-cyan-600 px-8 rounded-xl text-white transition"
         >
           Send
         </button>
