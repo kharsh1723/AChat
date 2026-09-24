@@ -9,6 +9,39 @@ import {
 
 import { db } from "../firebase/firebase";
 
+// Send normal text message
+export async function sendMessage(
+  roomCode,
+  username,
+  message
+) {
+  await addDoc(
+    collection(db, "rooms", roomCode, "messages"),
+    {
+      type: "message",
+      username,
+      message,
+      createdAt: serverTimestamp(),
+    }
+  );
+}
+
+// Send system message
+export async function sendSystemMessage(
+  roomCode,
+  message
+) {
+  await addDoc(
+    collection(db, "rooms", roomCode, "messages"),
+    {
+      type: "system",
+      message,
+      createdAt: serverTimestamp(),
+    }
+  );
+}
+
+// Send image message
 export async function sendImageMessage(
   roomCode,
   username,
@@ -25,18 +58,11 @@ export async function sendImageMessage(
   );
 }
 
-export async function sendSystemMessage(roomCode, message) {
-  await addDoc(
-    collection(db, "rooms", roomCode, "messages"),
-    {
-      type: "system",
-      message,
-      createdAt: serverTimestamp(),
-    }
-  );
-}
-
-export function subscribeMessages(roomCode, callback) {
+// Listen for messages
+export function subscribeMessages(
+  roomCode,
+  callback
+) {
   const q = query(
     collection(db, "rooms", roomCode, "messages"),
     orderBy("createdAt")
@@ -53,7 +79,10 @@ export function subscribeMessages(roomCode, callback) {
       callback(messages);
     },
     (error) => {
-      console.error("Firestore listener error:", error);
+      console.error(
+        "Firestore listener error:",
+        error
+      );
     }
   );
 }
