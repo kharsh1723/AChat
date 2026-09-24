@@ -9,19 +9,31 @@ import {
 
 import { db } from "../firebase/firebase";
 
-export async function sendMessage(roomCode, username, message) {
-
-  console.log("Username received:", username);
-
+export async function sendImageMessage(
+  roomCode,
+  username,
+  imageUrl
+) {
   await addDoc(
     collection(db, "rooms", roomCode, "messages"),
     {
+      type: "image",
       username,
+      imageUrl,
+      createdAt: serverTimestamp(),
+    }
+  );
+}
+
+export async function sendSystemMessage(roomCode, message) {
+  await addDoc(
+    collection(db, "rooms", roomCode, "messages"),
+    {
+      type: "system",
       message,
       createdAt: serverTimestamp(),
     }
   );
-
 }
 
 export function subscribeMessages(roomCode, callback) {
@@ -37,8 +49,6 @@ export function subscribeMessages(roomCode, callback) {
         id: doc.id,
         ...doc.data(),
       }));
-
-      console.log("Firebase returned:", messages);
 
       callback(messages);
     },
