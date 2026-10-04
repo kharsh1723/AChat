@@ -38,7 +38,6 @@ function ChatRoom() {
 
   const bottomRef = useRef(null);
 
-  // Prevent React StrictMode from creating fake join/leave notifications
   const effectRunRef = useRef(0);
 
   useEffect(() => {
@@ -48,10 +47,8 @@ function ChatRoom() {
 
     const currentRun = effectRunRef.current;
 
-    // Join room
     joinRoom(roomCode, username);
 
-    // Send join notification only once
     if (currentRun === 1 || !import.meta.env.DEV) {
       sendSystemMessage(
         roomCode,
@@ -73,7 +70,6 @@ function ChatRoom() {
       unsubscribeUsers();
       unsubscribeTyping();
 
-      // Ignore React StrictMode's first development cleanup
       if (import.meta.env.DEV && currentRun === 1) {
         return;
       }
@@ -132,38 +128,22 @@ function ChatRoom() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="h-[100dvh] bg-slate-950 flex flex-col overflow-hidden">
 
       {/* HEADER */}
 
-      <ChatHeader
-        roomCode={roomCode}
-        users={users}
-        onCopy={handleCopy}
-        onLeave={handleLeave}
-      />
-
-      {/* TYPING INDICATOR */}
-
-      {typingUsers
-        .filter(
-          (user) => user.username !== getUsername()
-        )
-        .map((user) => (
-          <div
-            key={user.username}
-            className="fixed bottom-24 left-6 z-40 text-sm text-slate-400"
-          >
-            <span className="text-cyan-400 font-semibold">
-              {user.username}
-            </span>{" "}
-            is typing...
-          </div>
-        ))}
+      <div className="shrink-0">
+        <ChatHeader
+          roomCode={roomCode}
+          users={users}
+          onCopy={handleCopy}
+          onLeave={handleLeave}
+        />
+      </div>
 
       {/* MESSAGES */}
 
-      <div className="flex-1 overflow-y-auto p-6 pt-40 pb-24">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 pb-24">
 
         {messages.map((msg) => (
           <MessageBubble
@@ -175,6 +155,24 @@ function ChatRoom() {
         <div ref={bottomRef}></div>
 
       </div>
+
+      {/* TYPING INDICATOR */}
+
+      {typingUsers
+        .filter(
+          (user) => user.username !== getUsername()
+        )
+        .map((user) => (
+          <div
+            key={user.username}
+            className="fixed bottom-24 left-4 z-40 text-sm text-slate-400"
+          >
+            <span className="text-cyan-400 font-semibold">
+              {user.username}
+            </span>{" "}
+            is typing...
+          </div>
+        ))}
 
       {/* INPUT */}
 
