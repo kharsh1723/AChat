@@ -119,7 +119,7 @@ function MessageInput({
   }, [roomCode]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-700 p-5">
+    <div className="shrink-0 z-50 bg-slate-900 border-t border-slate-700 p-3 sm:p-5">
 
       <div className="relative flex gap-3">
 
