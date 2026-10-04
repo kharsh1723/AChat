@@ -121,14 +121,14 @@ function MessageInput({
   return (
     <div className="shrink-0 z-50 bg-slate-900 border-t border-slate-700 p-3 sm:p-5">
 
-      <div className="relative flex gap-3">
+      <div className="relative flex gap-2 min-w-0 w-full">
 
         {/* EMOJI BUTTON */}
 
         <button
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="bg-slate-800 hover:bg-slate-700 px-4 rounded-xl text-2xl transition"
+          className="shrink-0 w-14 h-14 bg-slate-800 hover:bg-slate-700 rounded-xl text-2xl transition"
         >
           😊
         </button>
@@ -139,7 +139,7 @@ function MessageInput({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="bg-slate-800 hover:bg-slate-700 disabled:opacity-50 px-4 rounded-xl text-2xl transition"
+          className="shrink-0 w-14 h-14 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 rounded-xl text-2xl transition"
         >
           {uploading ? "⏳" : "📷"}
         </button>
@@ -185,7 +185,7 @@ function MessageInput({
               : "Type a message..."
           }
           disabled={uploading}
-          className="flex-1 rounded-xl bg-slate-800 text-white p-3 outline-none border border-transparent focus:border-cyan-500 disabled:opacity-60"
+          className="flex-1 min-w-0 w-0 rounded-xl bg-slate-800 text-white p-3 outline-none border border-transparent focus:border-cyan-500 disabled:opacity-60"
         />
 
         {/* SEND BUTTON */}
@@ -193,7 +193,7 @@ function MessageInput({
         <button
           onClick={handleSend}
           disabled={uploading}
-          className="bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 px-8 rounded-xl text-white transition"
+          className="shrink-0 w-16 h-14 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 rounded-xl text-white transition"
         >
           Send
         </button>
