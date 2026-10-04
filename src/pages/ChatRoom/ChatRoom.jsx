@@ -2,19 +2,22 @@ import {
   subscribeTyping,
 } from "../../services/typingService";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import ChatHeader from "../../components/Header/ChatHeader";
 import MessageInput from "../../components/Chat/MessageInput";
 import MessageBubble from "../../components/Chat/MessageBubble";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 
 import {
   sendMessage,
   sendSystemMessage,
+  sendImageMessage,
   subscribeMessages,
 } from "../../services/messageService";
+
+import { uploadImage } from "../../services/imageService";
 
 import {
   joinRoom,
@@ -48,7 +51,7 @@ function ChatRoom() {
     // Join room
     joinRoom(roomCode, username);
 
-    // Only send join notification on the real initialization
+    // Send join notification only once
     if (currentRun === 1 || !import.meta.env.DEV) {
       sendSystemMessage(
         roomCode,
@@ -70,13 +73,7 @@ function ChatRoom() {
       unsubscribeUsers();
       unsubscribeTyping();
 
-      /*
-        React StrictMode runs cleanup once immediately
-        after the first effect in development.
-
-        We don't want that fake cleanup to create
-        a "left the room" message.
-      */
+      // Ignore React StrictMode's first development cleanup
       if (import.meta.env.DEV && currentRun === 1) {
         return;
       }
@@ -106,6 +103,23 @@ function ChatRoom() {
     );
 
     setText("");
+  }
+
+  async function handleImageSelect(file) {
+    if (!file) return;
+
+    try {
+      const imageUrl = await uploadImage(file);
+
+      await sendImageMessage(
+        roomCode,
+        getUsername(),
+        imageUrl
+      );
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      alert("Failed to upload image.");
+    }
   }
 
   function handleCopy() {
@@ -169,6 +183,7 @@ function ChatRoom() {
         text={text}
         setText={setText}
         handleSend={handleSend}
+        handleImageSelect={handleImageSelect}
       />
 
     </div>

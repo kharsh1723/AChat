@@ -12,17 +12,20 @@ function MessageInput({
   text,
   setText,
   handleSend,
+  handleImageSelect,
 }) {
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const emojis = [
     "😀", "😂", "🤣", "😊", "😍",
     "🥰", "😎", "😢", "😭", "😡",
     "😮", "😅", "😉", "❤️", "💔",
     "👍", "👎", "👏", "🔥", "🎉",
-    "🙏", "💯", "✨", "😂", "🤔",
+    "🙏", "💯", "✨", "🤔",
   ];
 
   function handleChange(e) {
@@ -78,6 +81,33 @@ function MessageInput({
     }, 2000);
   }
 
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image must be smaller than 10 MB.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      await handleImageSelect(file);
+    } finally {
+      setUploading(false);
+
+      // Allows selecting the same image again later
+      e.target.value = "";
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -102,6 +132,25 @@ function MessageInput({
         >
           😊
         </button>
+
+        {/* IMAGE BUTTON */}
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="bg-slate-800 hover:bg-slate-700 disabled:opacity-50 px-4 rounded-xl text-2xl transition"
+        >
+          {uploading ? "⏳" : "📷"}
+        </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
 
         {/* EMOJI PICKER */}
 
@@ -130,15 +179,21 @@ function MessageInput({
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          className="flex-1 rounded-xl bg-slate-800 text-white p-3 outline-none border border-transparent focus:border-cyan-500"
+          placeholder={
+            uploading
+              ? "Uploading image..."
+              : "Type a message..."
+          }
+          disabled={uploading}
+          className="flex-1 rounded-xl bg-slate-800 text-white p-3 outline-none border border-transparent focus:border-cyan-500 disabled:opacity-60"
         />
 
         {/* SEND BUTTON */}
 
         <button
           onClick={handleSend}
-          className="bg-cyan-500 hover:bg-cyan-600 px-8 rounded-xl text-white transition"
+          disabled={uploading}
+          className="bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 px-8 rounded-xl text-white transition"
         >
           Send
         </button>
