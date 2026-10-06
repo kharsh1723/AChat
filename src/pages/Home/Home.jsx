@@ -1,30 +1,70 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import Button from "../../components/Button/Button";
 import Card from "../../components/Card/Card";
 
+import { enableNotifications } from "../../services/notificationService";
+
 function Home() {
   const navigate = useNavigate();
+
+  const [notificationStatus, setNotificationStatus] =
+    useState("");
+
+  async function handleEnableNotifications() {
+    try {
+      setNotificationStatus("Enabling...");
+
+      await enableNotifications();
+
+      setNotificationStatus("🔔 Notifications Enabled");
+    } catch (error) {
+      console.error(
+        "Notification setup failed:",
+        error
+      );
+
+      setNotificationStatus(
+        error.message || "Failed to enable notifications."
+      );
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black flex items-center justify-center px-6">
 
       {/* Background Glow */}
+
       <div className="absolute w-[500px] h-[500px] bg-cyan-500/20 blur-[180px] rounded-full -top-40 -left-32"></div>
 
       <div className="absolute w-[450px] h-[450px] bg-purple-500/20 blur-[180px] rounded-full bottom-0 right-0"></div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 40 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+        initial={{
+          opacity: 0,
+          scale: 0.95,
+          y: 40,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          y: 0,
+        }}
         transition={{ duration: 0.7 }}
       >
         <Card>
 
           <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{
+              opacity: 0,
+              y: -20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
             transition={{ delay: 0.2 }}
             className="text-6xl font-black text-cyan-400 text-center"
           >
@@ -51,6 +91,22 @@ function Home() {
               type="secondary"
               onClick={() => navigate("/join")}
             />
+
+            <button
+              type="button"
+              onClick={handleEnableNotifications}
+              className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition"
+            >
+              {notificationStatus === "Enabling..."
+                ? "⏳ Enabling..."
+                : "🔔 Enable Notifications"}
+            </button>
+
+            {notificationStatus && (
+              <p className="text-center text-sm text-slate-400">
+                {notificationStatus}
+              </p>
+            )}
 
           </div>
 

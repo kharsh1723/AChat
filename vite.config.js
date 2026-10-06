@@ -9,13 +9,21 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
 
+      strategies: "injectManifest",
+
+      srcDir: "src",
+      filename: "sw.js",
+
       manifest: {
         name: "AChat",
         short_name: "AChat",
         description: "A simple real-time chat application",
+
         theme_color: "#020617",
         background_color: "#020617",
+
         display: "standalone",
+
         start_url: "/",
         scope: "/",
 
